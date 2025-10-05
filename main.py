@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 
 # --- Настройки ---
-TOKEN = "8417773265:AAF6y_yLSCfL94b3is63sK2YRBQP2b2FvfY"
+TOKEN = "8417773265:AAFhYBVD6bOgVgEpGjGB6dVisJzIdi5Uce4"
 ADMIN_ID = 6580598992  #
 # === /start ===
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -69,3 +69,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
