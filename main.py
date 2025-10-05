@@ -1,9 +1,11 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+import asyncio
 
 # --- Настройки ---
 TOKEN = "8417773265:AAFhYBVD6bOgVgEpGjGB6dVisJzIdi5Uce4"
-ADMIN_ID = 6580598992  #
+ADMIN_ID = 6580598992
+
 # === /start ===
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -37,7 +39,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     text = update.message.text
 
-    # --- Сообщение для администратора с полной информацией ---
     name = user.full_name or "Без имени"
     username = f"@{user.username}" if user.username else "(username отсутствует)"
     user_id = user.id
@@ -52,21 +53,4 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"/reply {user_id} твой_ответ_сюда"
     )
     await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg)
-
-    # --- Подтверждение отправителю (анонимно) ---
-    await update.message.reply_text("✅ Ваше сообщение отправлено анонимно!")
-
-# === ЗАПУСК ===
-def main():
-    app = ApplicationBuilder().token(TOKEN).build()
-
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("reply", reply))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
-    print("🤖 Бот запущен и работает...")
-    app.run_polling()
-
-if __name__ == "__main__":
-    main()
-
+    await update.mes
