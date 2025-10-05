@@ -1,18 +1,19 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+from flask import Flask
+import threading
 
-# --- Настройки ---
 TOKEN = "8417773265:AAFhYBVD6bOgVgEpGjGB6dVisJzIdi5Uce4"
 ADMIN_ID = 6580598992
 
-# === /start ===
+# Твой код бота (оставь без изменений, только дополним внизу)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "👋 Привет! Отправь сюда сообщение — я передам его администратору *анонимно*.",
         parse_mode="Markdown"
     )
 
-# === /reply — ответ админу пользователю ===
 async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         await update.message.reply_text("⛔ У вас нет прав для этой команды.")
@@ -25,15 +26,11 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         user_id = int(context.args[0])
         reply_text = " ".join(context.args[1:])
-        await context.bot.send_message(
-            chat_id=user_id,
-            text=f"💬 Ответ от администратора:\n\n{reply_text}"
-        )
+        await context.bot.send_message(chat_id=user_id, text=f"💬 Ответ от администратора:\n\n{reply_text}")
         await update.message.reply_text("✅ Ответ отправлен пользователю.")
     except Exception as e:
         await update.message.reply_text(f"⚠️ Ошибка при отправке: {e}")
 
-# === Обработка входящих сообщений ===
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     text = update.message.text
@@ -54,16 +51,27 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg)
     await update.message.reply_text("✅ Ваше сообщение отправлено анонимно!")
 
-# === ЗАПУСК ===
-def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+# Запускаем Flask — простой сервер для Render
+app_flask = Flask(__name__)
 
+@app_flask.route('/')
+def home():
+    return "Bot is running!"
+
+def run_bot():
+    app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("reply", reply))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
-    print("🤖 Бот запущен и работает...")
     app.run_polling()
+
+def main():
+    # Запускаем бот в отдельном потоке
+    threading.Thread(target=run_bot).start()
+    # Запускаем Flask сервер, который слушает 0.0.0.0:8000
+    app_flask.run(host='0.0.0.0', port=8000)
 
 if __name__ == "__main__":
     main()
+
+
